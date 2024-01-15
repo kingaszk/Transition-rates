@@ -1,0 +1,38 @@
+import sys
+import math
+
+def find_transition_moment(file_path):
+	moments=[]
+	with open(file_path, 'r') as file:
+        # Iterate over each line in the file
+            for line in file:
+            # Check if the current line contains the excited state phrase
+                if "Transition moment" in line:
+                    moment = line.split()
+	   	    if len(moment) > 1:
+                    # Try to convert the following string into a float
+                        try:
+                            moment1 = float(moment[-1])
+                            moments.append(moment1)
+                        except ValueError:
+                        # If conversion fails, try another position (sometimes au as atomic units at the end)
+                            moment1 = float(moment[-2])
+                            moments.append(moment1)
+
+                            continue  # Continue looking for more transition moments values
+
+	return moments
+
+def print_parameter(filename):
+    debye=2.5417  #convert a.u to Debye
+    parameters=[]
+    # Three parameters: EDMA, EDME and SOC requires 3 different logs from Dalton calculations
+    for i in range(3):
+    #invoke searching 
+	    log=find_transition_moment(filename) 
+	    parameter=math.sqrt(log[0]**2+log[1]**2+log[2]**2)*debye
+    	return parameter
+			 
+
+
+print("Parameters in Debye: ","edma: ",print_parameter(sys.argv[1]),"edme: ",print_parameter(sys.argv[2]), "hso: ",print_parameter(sys.argv[3]))
