@@ -1,0 +1,7 @@
+To calculate the radiative and non-radiative rates of transitions we can use MOMAP (Molecular Materials Property Prediction Package) code available here: http://www.momap.net.cn/.
+In th manual, the authors suggest performing the required calculations in the Gaussian package. However, sometimes, problematic system requires spin-flip procdure, which is not available in the Gaussian package.
+Here is how to do it in the QChem program, along with the Python scripts to visualize and convert data properly.
+
+1. Produce the outputs for:  optimization of the ground state (azulene-s0.in), first excited state of singlet manifold (azulene-s1.in) and triplet state (azulene-t1.in). The queuing script named qchem.sub can be invoked with:
+qchem.sub *.in
+
