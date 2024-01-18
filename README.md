@@ -22,7 +22,8 @@ do_evc	= 1
 
 One should follow the instructions of momap package for running the calculations. 
 In my case it is 
-**$MOMAP_ROOT/bin/momap.py -i momap.inp -n 4  > log 2>&1 &**
+
+$MOMAP_ROOT/bin/momap.py -i momap.inp -n 4  > log 2>&1 &
 
 3. For the kIC it is required to know delta adiabatic energy Ead which can be obtained with simple Python script ead.py:
    
