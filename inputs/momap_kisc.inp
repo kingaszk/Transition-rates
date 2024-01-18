@@ -1,0 +1,16 @@
+do_isc_tvcf_ft = 1  
+do_isc_tvcf_spec = 1 
+
+&isc_tvcf
+  DUSHIN = .t. 
+  Temp = 298 K 
+  tmax = 10 fs 
+  dt = 0.01 fs 
+  Ead = 0.11847043 au 
+  Hso = 2.53 cm-1 
+  DSFile = "evc.cart.dat" 
+  Emax = 0.3 au 
+  logFile = "isc.tvcf.log"
+  FtFile = "isc.tvcf.ft.dat" 
+  FoFile = "isc.tvcf.fo.dat" 
+/

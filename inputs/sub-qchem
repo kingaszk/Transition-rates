@@ -1,0 +1,255 @@
+#!/bin/bash
+
+#set -x
+
+# Set defaults
+Queue="large"
+MemPPN="1800mb"
+Ncpus="4"
+MPI="0"
+Sequential="0"
+CurrDir=${PWD}
+Help="0"
+Test="0"
+LANG="C"
+Host=`uname -n`
+Version="6.0"
+
+if [ -z $1 ]
+then
+    Help="1"
+else
+    Help="0"
+fi
+
+# Read options
+while getopts ":n:pq:m:shtkv:" Option
+do
+    case $Option in
+        n ) Ncpus=$OPTARG ;;
+        p ) if [ $MPI = 0  ]
+            then
+                MPI="1"
+            else
+                MPI="0"
+            fi
+            ;;
+        q ) Queue=$OPTARG ;;
+        m ) MemPPN=$OPTARG ;;
+        s ) if [ $Sequential = 0 ]
+            then
+                Sequential="1"
+            else
+                Sequential="0"
+            fi
+            ;;
+        h ) Help="1" ;;
+        t ) Test="1"; set -x ;;
+        k ) Save="-save" ;;
+        v ) Version=$OPTARG ;;
+  esac
+done
+
+shift $(($OPTIND - 1))
+
+# Set Memory
+Memory=${MemPPN//[a-zA-Z]*/}
+Munit=`echo ${MemPPN//[0-9]/} | tr A-Z a-z`
+((Memory=Memory*Ncpus))
+
+case "$Munit" in
+    'kb' ) 
+        ((Vemory=Memory+100000+10000*Ncpus)) 
+        ;;
+
+    'mb' ) 
+        ((Vemory=Memory+100+10*Ncpus)) 
+        ;;
+
+    'gb' ) 
+        ((Memory=Memory*1024)) 
+        ((Vemory=Memory+Memory/Ncpus/10)) 
+        Munit='mb'
+        ;;
+
+      *  )
+        printf "Unknown memory unit %s" $Munit
+        exit 1
+        ;;
+esac
+
+Memory="${Memory}${Munit}"
+Vemory="${Vemory}${Munit}"
+
+if [ "$Ncpus" -gt "32" ]; then
+    echo Exceeding maximum of 32 threads
+    exit 1
+fi
+
+export Test CurrDir LANG Host Ncpus Save Version MPI
+
+Files=$*
+
+# Print help
+help() {
+
+# Header
+cat <<EOF
+usage: `basename $1` [options] inputfile1.in [inputfile2.in ...]
+
+Where options are: 
+  -s toggle sequential/batch execution
+  -m memory per cpu [$MemPPN, total: $Memory]
+  -n # ncpus [$Ncpus]
+  -p toggle mpi use [default OpenMP]
+  -q queue [$Queue]
+  -t test execution scripts
+  -h print this help
+  -k run qchem with -save option
+  -v version 4.4, 5.0 or 6.0 [$Version]
+EOF
+
+exit 0
+}
+
+[ $Help -eq 1 ] && help $0
+
+prepare_job () {
+# update input file
+
+    if [ -f $JOB.log ];
+    then
+        mv -f $JOB.log $JOB.old
+    fi
+    rm -f $JOB.err
+
+}
+
+script () {
+cat <<EOF
+#!/bin/bash
+
+[ $Test -ne 0 ] && set -x
+
+# Redirect stderr
+exec 1>>${CurrDir}/$JOB.err
+exec 2>>${CurrDir}/$JOB.err
+
+# setup scratch and env
+export QCSCRATCH=/scratch/${USER}/${JOB}_$$
+mkdir -p \$QCSCRATCH
+
+if [ -f  /opt/qchem/$Version/qcenv.sh ]; then
+    . /opt/qchem/$Version/qcenv.sh
+fi
+
+# save important variables
+echo -e "QChem job particulars:
+QCSCRATCH=\${QCSCRATCH}\n"
+
+cd ${CurrDir}
+
+# redirect output
+exec 1>$JOB.log
+
+# run qchem
+if [ $MPI = 1  ]; then
+    /opt/qchem/$Version/bin/qchem ${Save} -np ${Ncpus} $JOB.in ${JOB}.log
+else
+    /opt/qchem/$Version/bin/qchem ${Save} -nt ${Ncpus} $JOB.in ${JOB}.log
+fi
+
+if [ ${Save}='-save' ]; then
+    CHK="${CurrDir}/${JOB}.chk"
+    echo "Saving tmp files to \${CHK}"
+    mkdir -p \${CHK}
+    cp -r \${QCSCRATCH}/qchem*/* \${CHK}
+    rm -rf \${QCSCRATCH}
+else
+    rm -rf \${QCSCRATCH}
+fi
+
+# save some statistics
+exec 1>>${CurrDir}/$JOB.err
+
+# wrap up and exit
+#/usr/local/bin/cleanipcs-safe
+
+EOF
+}
+
+script_pbs () {
+cat <<EOF
+#!/bin/bash
+
+[ \$Test -ne 0 ] && set -x
+
+# Redirect stderr
+exec 1>>\${CurrDir}/\$JOB.err
+exec 2>>\${CurrDir}/\$JOB.err
+
+# setup scratch and env
+export QCSCRATCH=/scratch/\${USER}/\${JOB}_\${PBS_JOBID}
+mkdir -p \$QCSCRATCH
+
+if [ -f  /opt/qchem/\$Version/qcenv.sh ]; then
+    . /opt/qchem/\$Version/qcenv.sh
+fi
+
+# save important variables
+echo -e "QChem job particulars:
+QCSCRATCH=\${QCSCRATCH}
+PBS_JOBID=\${PBS_JOBID}
+PBS_NODEFILE=\${PBS_NODEFILE}\n"
+cat \${PBS_NODEFILE} >> \${CurrDir}/\$JOB.err
+
+cd \${CurrDir}
+
+# redirect output
+exec 1>\$JOB.log
+
+# run qchem
+if [ \$MPI = 1 ]
+then
+    /opt/qchem/\$Version/bin/qchem \${Save} -np \${Ncpus} -pbs \$JOB.in \${JOB}.log
+else
+    /opt/qchem/\$Version/bin/qchem \${Save} -nt \${Ncpus} -pbs \$JOB.in \${JOB}.log
+fi
+
+if [ \${Save}='-save' ]; then
+    CHK="\${CurrDir}/\${JOB}.chk"
+    echo "Saving tmp files to \${CHK}"
+    mkdir -p \${CHK}
+    cp -r \${QCSCRATCH}/qchem*/* \${CHK}
+    rm -rf \${QCSCRATCH}
+else
+    rm -rf \${QCSCRATCH}
+fi
+
+# save some statistics
+exec 1>>\${CurrDir}/\$JOB.err
+qstat -f \${PBS_JOBID} | grep resources_used
+
+# wrap up and exit
+#/usr/local/bin/cleanipcs-safe
+
+EOF
+}
+
+for File in $Files
+do
+    export JOB=${File/.in/}
+    prepare_job
+
+    if [ $Sequential -eq 0 ]
+    then
+        script_pbs | qsub -V -q $Queue -N ${JOB:0:15} -m n \
+                          -l ncpus=${Ncpus},mem=${Vemory} \
+                          -e ${JOB}.pbs -j eo -r n
+
+    else
+        script | /bin/bash -
+    fi    
+
+done
+

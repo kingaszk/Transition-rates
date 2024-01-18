@@ -1,0 +1,18 @@
+do_evc	= 1
+
+&evc
+ ffreq(1) = "AU-s0.log"
+ ffreq(2) = "AU-s1.log"
+ fnacme   = "AU-nacme.log"
+ if_del_int_coord = .t.
+ def_del_int_coord = 7 23  0 0
+	    	     2  1  6 0
+	    	     2  1  8 0
+	    	     2  3  4 0
+	    	     2  3 26 0
+	    	     3  2 24 0
+	    	     3  4  5 0
+	    	     3  4 25 0
+	    	     4  3 26 0
+ set_cart = t
+/
