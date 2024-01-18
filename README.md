@@ -10,18 +10,7 @@ Here is how to do it in the QChem program, along with the Python scripts to visu
     sub-qchem *.in
 
 3. Create the directories: evc, kic, kr  for the fluorescence spectrum and evc, kisc, kr, dalton for phosphorescence spectrum.
-    For the evc, you need the output file from s0,s1 and nacme QChem calculations. The input file for MOMAP (momap.inp) includes:
-
-do_evc	= 1
-
-&evc
- ffreq(1) = "s0.log"
- ffreq(2) = "s1.log"
- fnacme   = "nacme.log"
-/
-
-One should follow the instructions of momap package for running the calculations. 
-In my case it is 
+    For the evc, you need the output file from s0,s1 and nacme QChem calculations. You should follow the instructions of momap package for running the calculations. In my case it is 
 
 $MOMAP_ROOT/bin/momap.py -i momap.inp -n 4  > log 2>&1 &
 
