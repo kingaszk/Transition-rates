@@ -22,9 +22,9 @@ $MOMAP_ROOT/bin/momap.py -i momap.inp -n 4  > log 2>&1 &
 python ./ead.py s0.log s1.log
 or bash script:
 
-a=`grep "Final" s0.log | cut -f2 -d"s"`
-b=`grep "Final" s1.log | cut -f2 -d"s"`
+a=`grep "Final" s0.log | cut -f2 -d"s"` && 
+b=`grep "Final" s1.log | cut -f2 -d"s"` && 
 echo $b-$a | bc -l
 
-grep "Final" AU-s0.log
+
 5.  
