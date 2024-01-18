@@ -28,7 +28,7 @@ In my case it is
    
 **python ead.py s0.log s1.log**
 
-or bash script:
+or Bash script:
 
 **$ a=`grep "Final" s0.log | cut -f2 -d"s"` && b=`grep "Final" s1.log | cut -f2 -d"s"` && echo $b-$a | bc -l**
 
@@ -43,9 +43,9 @@ $ gnuplot *gnu
  is the mass of an electron and ![image](https://github.com/kingaszk/AT-AU-photodeactivation/assets/156574267/a403ff5f-003d-4522-9317-1a94bad96e76)
  is the reduced Planck constant.
 
-You can use the Python eda.py script to convert needed parameters.
+You can use the Python script to convert needed parameters.
 
-**python eda.py &**
+**python qchem_transitions.py &**
 
 IMPORTANT: one should remember to do the calculations of the excited state on the starting geometry of the optimized ground state. Otherwise, the parameters should be calculated again (just single-points on the s0 and s1 molecules).
 
@@ -54,7 +54,7 @@ IMPORTANT: one should remember to do the calculations of the excited state on th
 
 The Python script which extracts the required parameters from the Dalton output is attached.
 
-**python dalton-par.py edma.log edme.log soc.log**
+**python dalton_transitions.py edma.log edme.log soc.log**
 
 
 The example for the adenine-uracil base pair calculations is attached in the proper directories.
