@@ -35,7 +35,7 @@ $ gnuplot *gnu
 
 You can use the Python script to convert needed parameters.
 
-**python qchem_transitions.py &**
+**python qchem_transitions.py s1.log**
 
 IMPORTANT: one should remember to do the calculations of the excited state on the starting geometry of the optimized ground state. Otherwise, the parameters should be calculated again (just single points on the s0 and s1 molecules).
 
