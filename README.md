@@ -22,8 +22,7 @@ or Bash script:
 
 **$ a=`grep "Final" s0.log | cut -f2 -d"s"` && b=`grep "Final" s1.log | cut -f2 -d"s"` && echo $b-$a | bc -l**
 
-You can visualize the results with the Gnuplot script prepared in the specific directory:
-
+You can visualize the results with the Gnuplot scripts
 $ gnuplot *gnu
 
 4.  For the kr calculations one should extract the transition moments from  the output files. In the case of the QChem package it can be converted from the oscillator strength ![image](https://github.com/kingaszk/AT-AU-photodeactivation/assets/156574267/4c4146d8-e5cf-4b90-9c71-7f79fcf0b5ca)
@@ -52,7 +51,7 @@ The Python script which extracts the required parameters from the Dalton output 
 **python dalton_transitions.py edma.log edme.log soc.log**
 
 
-The example for the adenine-uracil base pair calculations can be found in the proper directories.
+
 If there is any trouble, the manuals can be found here:
 1. https://manual.q-chem.com/5.2/Ch7.S3.SS6.html
 2. http://www.momap.net.cn/archives/docs/MOMAP_Tutorial_02_Irppy3.pdf
