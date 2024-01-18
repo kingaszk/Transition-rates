@@ -1,0 +1,153 @@
+#! /usr/bin/env bash
+
+# generic parameters
+nodes=1
+cores=1
+memory=1
+time_limit=1
+partition=normal
+
+executable=dalton
+name=""
+
+set -o errexit -o pipefail -o noclobber -o nounset
+
+! getopt --test > /dev/null 
+if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
+	echo 'I’m sorry, `getopt --test` failed in this environment.'
+	exit 1
+fi
+
+
+LONGOPTS=help,nodes:,cores:,memory:,time:,partition:,exec:,name:
+OPTIONS=hn:c:m:t:p:e:
+
+
+! PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTS --name "$0" -- "$@")
+if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
+	exit 2
+fi
+
+eval set -- "$PARSED"
+
+#split until --
+while true; do
+	case "$1" in
+		-h|--help)
+			source ./src/usage
+			specific_usage
+			exit 1
+			shift
+			;;
+		-p|--partition)
+			partition="$2"
+			shift 2
+			;;
+		-n|--nodes)
+			nodes="$2"
+			shift 2
+			;;
+		-c|--cores)
+			cores="$2"
+			shift 2
+			;;
+		-m|--memory)
+			memory="$2"
+			shift 2
+			;;
+		-t|--time)
+			time_limit="$2"
+			shift 2
+			;;
+		# optional
+		--exec)
+			executable="$2"
+			shift 2
+			;;
+		--name)
+			name="$2"
+			shift 2
+			;;
+		--)
+			shift
+			break
+			;;
+		*)
+			echo "Programming error"
+			exit 3
+			;;
+	esac
+done
+
+
+specific_usage() {
+	printf "\t%-20s %-15s  %s\n" "-s | --specific" "PARAMETER" "Description of the SUB SPECIFIC parameter" 
+}
+
+if [ $# -lt 1 ] ; then
+	echo -e "Usage: $0  [PARAMETERS]  INPUT_FILE  MOLECULE_FILE"
+	echo "Parameters:"
+	printf "\t%-20s %-15s  %s\n" "-p | --partition" "PARTITION" "Set partition (queue). Default = $partition"
+	printf "\t%-20s %-15s  %s\n" "-n | --nodes" "NODES" "Set number of nodes. Default = $nodes"
+	printf "\t%-20s %-15s  %s\n" "-c | --cores" "CORES" "Up to 48. Default = $cores"
+	printf "\t%-20s %-15s  %s\n" "-m | --memory" "MEMORY" "In GB, up to 390 (must be integer value). Default = $memory"
+	printf "\t%-20s %-15s  %s\n" "-t | --time" "TIME_LIMIT" "In hours. Default = $time_limit"
+	specific_usage
+	exit 1
+fi
+
+
+[[ -z "$name" ]] && name=$1
+
+# handle incorrect number of arguments
+#if [[ $# -ne 1 ]]; then
+	#echo "$0: A single input file is required."
+	#exit 4
+#fi
+
+cat << EOF | sbatch --export=none
+#! /usr/bin/env bash
+#SBATCH -p $partition
+#SBATCH -N $nodes
+#SBATCH -n $cores
+#SBATCH --mem=${memory}GB
+#SBATCH -t ${time_limit}:00:00
+#SBATCH -J $name
+
+echo -e "\nJOB START:\t\$(date)\n\n"
+
+
+ulimit -l unlimited
+module load Dalton/2020.0-foss-2021a
+
+echo -e "\n################### EXECUTING CODE BELOW ################### \n"
+
+# code below copypasted from 
+# https://hpc-uit.readthedocs.io/en/latest/applications/chemistry/Dalton/firsttime_dalton.html
+
+# copy input files to scratch directory
+cp $@ \$TMPDIR
+
+# run the code
+cd \$TMPDIR
+$executable -N $cores -t \$TMPDIR $@
+
+# copy output and tar file to submit dir
+cp *.out *.tar.gz \${SLURM_SUBMIT_DIR}
+
+echo -e "\n################### EXECUTING CODE ABOVE ################### \n"
+
+echo -e "\n\nJOB END:\t\$(date)"
+
+EOF
+
+printf "\t%-11s - %s\n" "job name" $name 1>&2
+printf "\t%-11s - %s\n" "partition" $partition 1>&2
+printf "\t%-11s - %s\n" "nodes" $nodes 1>&2
+printf "\t%-11s - %s\n" "cores" $cores 1>&2
+printf "\t%-11s - %s GB (per node)\n" "memory" $memory 1>&2
+printf "\t%-11s - %s hours\n" "time limit" $time_limit 1>&2
+printf "\t%-11s - %s\n" "executable" $executable 1>&2
+printf "\t%-11s - " "inputs"  1>&2
+echo -e "$@" 1>&2
+

@@ -1,0 +1,20 @@
+do_spec_tvcf_ft   = 1
+do_spec_tvcf_spec = 1
+
+&spec_tvcf
+  DUSHIN        = .t. 
+  Temp          = 300 K
+  tmax          = 2000 fs
+  dt            = 0.5   fs  
+  Ead           = 0.18342959 au
+  EDMA          = 0.17776371 debye
+  EDME          = 0.19250102 debye
+  FreqScale     = 1.0 
+  DSFile        = "evc.cart.dat"
+  Emax          = 0.3 au
+  dE            = 0.00001 au
+  logFile       = "spec.tvcf.log"
+  FtFile        = "spec.tvcf.ft.dat"
+  FoFile        = "spec.tvcf.fo.dat"
+  FoSFile       = "spec.tvcf.spec.dat"
+/

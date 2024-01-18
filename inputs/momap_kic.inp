@@ -1,0 +1,16 @@
+do_ic_tvcf_ft   = 1
+do_ic_tvcf_spec = 1
+
+&ic_tvcf
+  DUSHIN        = .t. 
+  Temp          = 300 K
+  tmax          = 10 fs
+  dt            = 0.1   fs  
+  Ead           = .18342959 au
+  DSFile        = "evc.cart.dat"
+  CoulFile      = "evc.cart.nac"
+  Emax          = 0.3 au
+  logFile       = "ic.tvcf.log"
+  FtFile        = "ic.tvcf.ft.dat"
+  FoFile        = "ic.tvcf.fo.dat"
+/
