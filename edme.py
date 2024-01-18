@@ -45,7 +45,7 @@ def find_all_strength_values(file_path):
     # Return all found strength values
     return strength_values,energy_values
 
-# Replace 'your_file.txt' with your actual file path
+# Give the parameter 1 as your s1.out
 filename=sys.argv[1]
 strength_values,energy_values = find_all_strength_values(filename)
 
