@@ -40,11 +40,15 @@ IMPORTANT: one should remember to do the calculations of the excited state on th
 
 
 5. In the case of the phosphorescence rates it is an analogous procedure. You need the optimized  geometry of the ground state and T1  triplet state.
+   
    However, the QChem package is not able to produce the transition dipole moments of triplet geometry while printing SOC Hamiltonian (or at least I did not find it in the manual). The Hso parameter for the kISC can be obtained from the QChem output generated from soc.in (sub-qchem soc.in). However, while the spin-flip procedure does not make sense for the triplet configuration, it is better to calculate the EDMA, EDME, and HSo parameters within Dalton package.
 
 sub-dalton edma.dal s0.mol
+
 sub-dalton edme.dal t1.mol
+
 sub-dalton soc.dal t1.mol
+
 
 The Python script which extracts the required parameters from the Dalton output is attached.
 
@@ -53,6 +57,7 @@ The Python script which extracts the required parameters from the Dalton output 
 
 
 If there is any trouble, the manuals can be found here:
+
 1. https://manual.q-chem.com/5.2/Ch7.S3.SS6.html
 2. http://www.momap.net.cn/archives/docs/MOMAP_Tutorial_02_Irppy3.pdf
 3. https://daltonprogram.org/manuals/dalton2020manual.pdf
