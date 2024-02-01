@@ -5,7 +5,7 @@ In the manual, the authors suggest performing the required calculations in the G
 Here is how to do it in the QChem program, along with the Python scripts to visualize and convert data properly.
 
 1. Produce the outputs for optimization of the ground state (s0.in), a first excited state of singlet manifold (s1.in), triplet state (t1.in), and nonadiabatic couplings (nacme.in).
-   When you install this package you can create your own queuing script named sub-qchem (main is attached for an example). It can be invoked with:
+   When you install this package you can create your own queuing script named sub-qchem (mine is attached for an example). It can be invoked with:
 
     sub-qchem *.in
 
