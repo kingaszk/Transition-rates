@@ -1,9 +1,7 @@
-# python dalton_par.py edma_s0.out edme_t1.out soc_t1.out
-
-
-
 import sys
 import math
+
+doc='''Usage: python dalton_par.py edma_s0.out edme_t1.out soc_t1.out'''
 
 def find_transition_moment(file_path):
 	moments=[]
@@ -53,7 +51,7 @@ def print_parameter(filename):
     	return parameter
 
 
-print("Parametry w Debye: ","edma: ",print_parameter(sys.argv[1]),"edme: ",print_parameter(sys.argv[2]), "hso: ",print_parameter(sys.argv[3]))
+print("Parameters in Debye: ","edma: ",print_parameter(sys.argv[1]),"edme: ",print_parameter(sys.argv[2]), "hso: ",print_parameter(sys.argv[3]))
 
 log=find_spinorbit_coupling(sys.argv[3])
 hso=math.sqrt((log[0]**2+log[1]**2+log[2]**2)/3.)  
